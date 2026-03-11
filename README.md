@@ -1,11 +1,8 @@
-# Microsoft Agent Framework — AI Interview Assistant (1-hour demo repo)
+# Microsoft Agent Framework — AI Interview Assistant (demo 1)
 
-This repo is designed for a **1-hour, hands-on** tech talk showcasing the two core capability buckets in **Microsoft Agent Framework**:
+This repo is a **hands-on** tech talk showcasing **Microsoft Agent Framework** AI Agents — LLM-driven agents that produce structured output from unstructured text.
 
-- **AI Agents** (LLM-driven, tool-using, dynamic steps)
-- **Workflows** (explicit orchestration graph with control-flow, checkpoints, human-in-the-loop)
-
-> The code is intentionally *minimal* and console-based so you can live-code it.
+> Branch **`demo/1-single-agent`** — a single agent that ingests a resume and returns structured JSON.
 
 ---
 
@@ -14,8 +11,6 @@ This repo is designed for a **1-hour, hands-on** tech talk showcasing the two co
 - **.NET 8 SDK+**
 - **Azure OpenAI** endpoint + a deployed chat model (e.g., `gpt-4o-mini`)
 - **Azure CLI** authenticated via `az login` **OR** an API key
-
-The Microsoft Learn quick-start uses these packages and Azure CLI auth.
 
 ---
 
@@ -28,71 +23,69 @@ From `src/InterviewAssistant`:
 dotnet add package Azure.AI.OpenAI --prerelease
 dotnet add package Azure.Identity
 dotnet add package Microsoft.Agents.AI.OpenAI --prerelease
-
-# Workflows (to demonstrate orchestration graphs)
-dotnet add package Microsoft.Agents.AI.Workflows --prerelease
-
-# Optional (nice-to-have)
-dotnet add package Microsoft.Extensions.Configuration
-dotnet add package Microsoft.Extensions.Configuration.EnvironmentVariables
 ```
 
 ---
 
 ## 2) Configure environment
 
-Set these environment variables:
+Set these environment variables before running:
 
-- `AZURE_OPENAI_ENDPOINT` — e.g. `https://your-resource.openai.azure.com/`
-- `AZURE_OPENAI_DEPLOYMENT` — e.g. `gpt-4o-mini`
+```bash
+# Required
+$env:AZURE_OPENAI_ENDPOINT   = "https://your-resource.openai.azure.com/"
+$env:AZURE_OPENAI_DEPLOYMENT = "gpt-4o-mini"
 
-Optional:
-- `AZURE_OPENAI_API_KEY` — if you don’t want Azure CLI / RBAC auth
+# Optional — omit to use Azure CLI / RBAC auth (az login)
+$env:AZURE_OPENAI_API_KEY    = "your-api-key"
+```
 
 ---
 
 ## 3) Run
 
-### Simple (agents-only) pipeline
+From the **repo root**:
 
 ```bash
-dotnet run --mode simple --resume ../../assets/resumes/jane_doe.txt
+cd src/InterviewAssistant
+dotnet run ../../assets/resumes/jane_doe.txt
 ```
 
-### Workflows pipeline (agent graph + approval gate)
+The resume path argument is optional — when omitted it defaults to `assets/resumes/jane_doe.txt` (resolved relative to the project directory).
 
-```bash
-dotnet run --mode workflow --resume ../../assets/resumes/jane_doe.txt
+### Expected output
+
+```
+=== Demo 1: Single Agent ===
+
+Candidate : Jane Doe
+Experience: 6 years
+Skills    : C#, .NET, Azure, Azure Service Bus, Cosmos DB, ...
+Red Flags :
 ```
 
 ---
 
 ## 4) What this demo shows
 
-### Agents
-- Resume ingestion → **structured JSON output**
-- Seniority classification
-- Interview plan generation
-- (Optional) interactive follow-ups
-
-### Workflows
-- Explicit **graph** of steps (executors + edges)
-- A **human-in-the-loop approval gate** before the interview plan is finalized
-
-Workflows are defined as an explicit sequence/graph, vs. agents whose steps are dynamic and model-driven.
-
----
-
-## 5) Live-coding suggestion
-
-Start with **simple mode** (agents only). Once the audience sees the value, switch to **workflow mode** and show how the same “brain” (agents) becomes **production-safe** via orchestration and checkpoints.
+- A resume text file is passed to an **AI Agent** backed by Azure OpenAI
+- The agent returns **structured JSON** (`ResumeProfile`) parsed directly from the model response
+- Auth supports both **Azure CLI / RBAC** (`az login`) and an explicit **API key**
 
 ---
 
 ## Repo layout
 
-- `src/InterviewAssistant/Program.cs` — CLI entrypoint
-- `src/InterviewAssistant/Agents/` — agent factory + prompts
-- `src/InterviewAssistant/Models/` — POCOs for structured outputs
-- `src/InterviewAssistant/Workflows/` — minimal workflow runner + approval executor
-- `assets/resumes/` — sample resume text
+```
+src/InterviewAssistant/
+  Program.cs            — CLI entrypoint (reads resume path from args)
+  Agents/
+    AgentFactory.cs     — creates an AIAgent backed by Azure OpenAI
+    AgentPrompts.cs     — system prompt for resume ingestion
+    JsonAgentRunner.cs  — runs the agent and deserialises JSON output
+  Models/
+    ResumeProfile.cs    — POCO for structured resume output
+assets/
+  resumes/
+    jane_doe.txt        — sample résumé used in the demo
+```
