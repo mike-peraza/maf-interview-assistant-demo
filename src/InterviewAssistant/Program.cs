@@ -13,6 +13,9 @@ if (!File.Exists(resumePath))
 
 var resumeText = await File.ReadAllTextAsync(resumePath);
 
+// WE CREATE A SINGLE AGENT, which will be responsible for parsing the resume and extracting key information
+// such as candidate name, years of experience, core skills, and potential red flags. The agent is created using the AgentFactory,
+// which sets up an Azure OpenAI Agent with specific instructions defined in AgentPrompts.ResumeIngestion.
 AIAgent ingestionAgent = AgentFactory.CreateAzureOpenAIAgent("ResumeIngestion", AgentPrompts.ResumeIngestion);
 
 Console.WriteLine("=== Demo 1: Single Agent ===\n");

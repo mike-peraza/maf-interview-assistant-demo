@@ -12,6 +12,10 @@ public static class JsonAgentRunner
         AllowTrailingCommas = true
     };
 
+    /// <summary>
+    /// Runs the specified prompt using the given AI agent and deserializes the response as JSON into the specified
+    /// type.
+    /// </summary>
     public static async Task<(T Value, string Raw)> RunJsonAsync<T>(AIAgent agent, string prompt, CancellationToken cancellationToken = default)
     {
         var result = await agent.RunAsync(prompt, cancellationToken: cancellationToken);
